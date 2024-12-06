@@ -1,0 +1,37 @@
+syntax = "proto3";
+package proofs.models;
+
+option go_package = "offchain-proofs/proofs_pb";
+
+message VerifyBatchesRequest {
+  uint32 rollup_id = 1;
+  uint64 pending_state_num = 2;
+  uint64 init_num_batch = 3;
+  uint64 final_new_batch = 4;
+  bytes new_local_exit_root = 5;
+  bytes new_state_root = 6;
+  string beneficiary = 7;
+  repeated bytes proof = 8;
+
+  string signer = 9;
+  string tx_hash = 10;
+}
+
+message VerifyBatchesTrustedAggregatorEvent {
+  uint64 final_new_batch = 1;
+  bytes new_state_root = 2;
+  string sender = 3;
+
+  uint64 block_number = 4;
+  string tx_hash = 5;
+  repeated bytes topics = 6;
+  bytes data = 7;
+  string address = 8;
+}
+
+message VerifyBatchesTrustedAggregatorEvents {
+  repeated VerifyBatchesTrustedAggregatorEvent values = 1;
+}
+
+message Blank {}
+

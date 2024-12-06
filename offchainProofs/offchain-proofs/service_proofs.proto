@@ -1,0 +1,12 @@
+syntax = "proto3";
+package proofs.service;
+
+option go_package = "offchain-proofs/proofs_pb";
+
+import "models_proofs.proto";
+
+service OffchainProofsService {
+  rpc VerifyBatchesSimulate(models.VerifyBatchesRequest) returns (models.Blank);
+  rpc StreamNewEvents(models.Blank) returns (stream models.VerifyBatchesTrustedAggregatorEvent);
+  rpc GetEvents(models.Blank) returns (models.VerifyBatchesTrustedAggregatorEvents);
+}
