@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ledgerwatch/erigon/offchainProofs"
 	"io/fs"
 	"math/big"
 	"net"
@@ -1067,6 +1068,11 @@ func New(ctx context.Context, stack *node.Node, config *ethconfig.Config, logger
 			ethermanClients[i] = c.EthClient
 		}
 
+		offchainSrv, err := offchainProofs.NewOffchainProofsService(config.OffchainService)
+		if err != nil {
+			return nil, err
+		}
+
 		seqVerSyncer := syncer.NewL1Syncer(
 			ctx,
 			ethermanClients,
@@ -1075,6 +1081,7 @@ func New(ctx context.Context, stack *node.Node, config *ethconfig.Config, logger
 			cfg.L1BlockRange,
 			cfg.L1QueryDelay,
 			cfg.L1HighestBlockType,
+			offchainSrv,
 		)
 
 		backend.l1Syncer = syncer.NewL1Syncer(
@@ -1085,6 +1092,7 @@ func New(ctx context.Context, stack *node.Node, config *ethconfig.Config, logger
 			cfg.L1BlockRange,
 			cfg.L1QueryDelay,
 			cfg.L1HighestBlockType,
+			offchainSrv,
 		)
 
 		log.Info("Rollup ID", "rollupId", cfg.L1RollupId)
@@ -1100,6 +1108,7 @@ func New(ctx context.Context, stack *node.Node, config *ethconfig.Config, logger
 			cfg.L1BlockRange,
 			cfg.L1QueryDelay,
 			cfg.L1HighestBlockType,
+			offchainSrv,
 		)
 
 		l1InfoTreeUpdater := l1infotree.NewUpdater(cfg.Zk, l1InfoTreeSyncer)
@@ -1163,6 +1172,7 @@ func New(ctx context.Context, stack *node.Node, config *ethconfig.Config, logger
 				cfg.L1BlockRange,
 				cfg.L1QueryDelay,
 				cfg.L1HighestBlockType,
+				offchainSrv,
 			)
 
 			backend.syncStages = stages2.NewSequencerZkStages(
