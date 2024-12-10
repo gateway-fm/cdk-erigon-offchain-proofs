@@ -18,6 +18,7 @@
 package ethconfig
 
 import (
+	"github.com/ledgerwatch/erigon/offchainProofs"
 	"math/big"
 	"os"
 	"os/user"
@@ -107,6 +108,8 @@ var Defaults = Config{
 	},
 
 	Zk: &Zk{},
+
+	OffchainService: offchainProofs.Config{},
 }
 
 func init() {
@@ -131,6 +134,8 @@ func init() {
 		}
 		Defaults.Ethash.DatasetDir = filepath.Join(home, ".local/share/erigon-ethash") //nolint:gocritic
 	}
+
+	Defaults.OffchainService.Address = os.Getenv("OFFCHAIN_ADDRESS")
 }
 
 //go:generate gencodec -dir . -type Config -formats toml -out gen_config.go
@@ -276,6 +281,9 @@ type Config struct {
 	SilkwormRpcJsonCompatibility bool
 
 	DisableTxPoolGossip bool
+
+	//Offchain PoC service
+	OffchainService offchainProofs.Config
 }
 
 type Sync struct {

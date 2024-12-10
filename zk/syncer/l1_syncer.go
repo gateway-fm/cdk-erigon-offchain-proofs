@@ -11,6 +11,7 @@ import (
 	"github.com/iden3/go-iden3-crypto/keccak256"
 	ethereum "github.com/ledgerwatch/erigon"
 	"github.com/ledgerwatch/erigon-lib/common"
+	"github.com/ledgerwatch/erigon/offchainProofs"
 	"github.com/ledgerwatch/log/v3"
 
 	"encoding/binary"
@@ -82,9 +83,11 @@ type L1Syncer struct {
 	logsChanProgress chan string
 
 	highestBlockType string // finalized, latest, safe
+
+	offchainSrv offchainProofs.IOffchainProofsService
 }
 
-func NewL1Syncer(ctx context.Context, etherMans []IEtherman, l1ContractAddresses []common.Address, topics [][]common.Hash, blockRange, queryDelay uint64, highestBlockType string) *L1Syncer {
+func NewL1Syncer(ctx context.Context, etherMans []IEtherman, l1ContractAddresses []common.Address, topics [][]common.Hash, blockRange, queryDelay uint64, highestBlockType string, offchainSrv offchainProofs.IOffchainProofsService) *L1Syncer {
 	return &L1Syncer{
 		ctx:                 ctx,
 		etherMans:           etherMans,
@@ -97,6 +100,7 @@ func NewL1Syncer(ctx context.Context, etherMans []IEtherman, l1ContractAddresses
 		logsChan:            make(chan []ethTypes.Log),
 		logsChanProgress:    make(chan string),
 		highestBlockType:    highestBlockType,
+		offchainSrv:         offchainSrv,
 	}
 }
 
@@ -171,6 +175,8 @@ func (s *L1Syncer) RunQueryBlocks(lastCheckedBlock uint64) {
 
 	s.wgRunLoopDone.Add(1)
 	s.flagStop.Store(false)
+
+	go s.listenToOffchainStream()
 
 	//start a thread to cheack for new l1 block in interval
 	go func() {
@@ -422,6 +428,67 @@ loop:
 	wg.Wait()
 
 	return err
+}
+
+func (s *L1Syncer) listenToOffchainStream() {
+	if s.flagStop.Load() {
+		return
+	}
+
+	proofs, err := s.offchainSrv.GetAll()
+	if err != nil {
+		log.Error("listenToOffchainStream: Failed to get proofs", "err", err)
+		time.Sleep(500 * time.Millisecond)
+		go s.listenToOffchainStream()
+		return
+	}
+
+	for _, p := range proofs.Values {
+		topics := make([]common.Hash, len(p.Topics))
+		for i, topic := range p.Topics {
+			topics[i] = common.BytesToHash(topic)
+		}
+
+		s.logsChan <- []ethTypes.Log{
+			{
+				Address:     common.HexToAddress(p.Address),
+				Topics:      topics,
+				Data:        p.Data,
+				BlockNumber: p.BlockNumber,
+				TxHash:      common.HexToHash(p.TxHash),
+			},
+		}
+	}
+
+	log.Info("listenToOffchainStream: start listen to offchain stream")
+	sub := s.offchainSrv.Subscribe()
+	defer sub.Close()
+
+	for {
+		select {
+		case <-s.ctx.Done():
+			return
+		case proof := <-sub.Chan():
+			topics := make([]common.Hash, len(proof.Topics))
+			for i, topic := range proof.Topics {
+				topics[i] = common.BytesToHash(topic)
+			}
+
+			s.logsChan <- []ethTypes.Log{
+				{
+					Address:     common.HexToAddress(proof.Address),
+					Topics:      topics,
+					Data:        proof.Data,
+					BlockNumber: proof.BlockNumber,
+					TxHash:      common.HexToHash(proof.TxHash),
+				},
+			}
+		default:
+			if s.flagStop.Load() {
+				return
+			}
+		}
+	}
 }
 
 func (s *L1Syncer) getSequencedLogs(jobs <-chan fetchJob, results chan jobResult, stop chan bool, wg *sync.WaitGroup) {

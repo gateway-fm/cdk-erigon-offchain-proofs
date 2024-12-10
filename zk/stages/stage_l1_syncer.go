@@ -173,9 +173,7 @@ Loop:
 					if err := hermezDb.WriteVerification(info.L1BlockNo, info.BatchNo, info.L1TxHash, info.StateRoot); err != nil {
 						return fmt.Errorf("WriteVerification for block %d: %w", info.L1BlockNo, funcErr)
 					}
-					if info.L1BlockNo > highestWrittenL1BlockNo {
-						highestWrittenL1BlockNo = info.L1BlockNo
-					}
+
 					newVerificationsCount++
 				case logIncompatible:
 					continue
@@ -410,6 +408,8 @@ func blockComparison(tx kv.RwTx, hermezDb *hermez_db.HermezDb, blockNo uint64, l
 		log.Error(fmt.Sprintf("[%s] State root mismatch in block %d. Local=0x%x, L1 verification=0x%x", logPrefix, blockNo, block.Root(), v.StateRoot))
 		return ErrStateRootMismatch
 	}
+
+	log.Info(fmt.Sprintf("[%s] State root success in block %d. Local=0x%x, L1 verification=0x%x", logPrefix, blockNo, block.Root(), v.StateRoot))
 
 	return nil
 }
