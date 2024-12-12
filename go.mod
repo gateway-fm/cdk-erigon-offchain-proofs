@@ -60,6 +60,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/golang-lru/arc/v2 v2.0.6
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/holiman/uint256 v1.3.1
@@ -106,11 +107,11 @@ require (
 	github.com/xsleonard/go-merkle v1.1.0
 	go.uber.org/mock v0.4.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.22.0
+	golang.org/x/crypto v0.31.0
 	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b
-	golang.org/x/net v0.24.0
-	golang.org/x/sync v0.7.0
-	golang.org/x/sys v0.20.0
+	golang.org/x/net v0.25.0
+	golang.org/x/sync v0.10.0
+	golang.org/x/sys v0.28.0
 	golang.org/x/time v0.5.0
 	google.golang.org/grpc v1.63.2
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.3.0
@@ -185,7 +186,6 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
 	github.com/google/pprof v0.0.0-20240409012703-83162a5b38cd // indirect
-	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/hermeznetwork/tracerr v0.3.2 // indirect
 	github.com/ianlancetaylor/cgosymbolizer v0.0.0-20220405231054-a1ae3e4bba26 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
@@ -300,8 +300,8 @@ require (
 	go.uber.org/fx v1.20.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.20.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240227224415-6ceb2ff114de // indirect
 	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
